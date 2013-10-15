@@ -83,10 +83,10 @@ requirejs(['fs', 'http', 'express', 'winston', 'jade-amd', 'socket.io', 'server/
 		//socket.emit('rate', { text : 'Welcome!' });
 		if(data.success){
 
-			if(data.success.payload.query.results.rate){
+			if(data.success.payload.query.results && data.success.payload.query.results.rate){
 
 				var ts = data.success.payload.query.created;
-				data.success.payload.query.results.rate.forEach(function(rate){
+				Array.prototype.forEach.call(data.success.payload.query.results.rate, function(rate){
 					var payload = {
 						time: ts,
 						pair: rate.id,
