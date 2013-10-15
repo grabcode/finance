@@ -1,0 +1,20 @@
+#addPair {
+	margin-top: 10px;
+}
+
+.follow-pair {
+	float: left;
+	margin-right: 10px;
+}
+
+.transition-opacity {
+	transition: opacity 0.3s ease-in-out;
+}
+
+.no-opacity {
+	opacity: 1;
+}
+
+.full-opacity {
+	opacity: 0;
+}

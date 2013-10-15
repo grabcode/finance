@@ -1,0 +1,25 @@
+{
+  "name": "finance",
+  "version": "0.0.1",
+  "description": "financial data realtime view",
+  "main": "entry.js",
+  "dependencies": {
+    "socket.io": "~0.9.16",
+    "express": "~3.3.4",
+    "requirejs": "*",
+    "MD5": "*",
+    "mocha": "*",
+    "uuid": "*",
+    "underscore": "*",
+    "request": "*",
+    "jade-amd": "~0.1.0",
+    "jade": "~0.35.0",
+    "winston": "~0.7.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "grabcode",
+  "license": "BSD"
+}

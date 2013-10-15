@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>finance</title>
+    <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="app/css/style.css">
+</head>
+<body>
+	<div ng-controller="AppController" class="page active">
+		
+    <div class="menu">
+	    <button type="button" class="btn btn-primary" ng-click="showAddPair=!showAddPair">
+	        Follow pair
+	    </button>
+	    <div id="addPair" class="transition-opacity" ng-class="{'full-opacity': !showAddPair, 'no-opacity': showAddPair}">
+		  	<form class="form-inline" role="form">
+				  <div class="form-group follow-pair">
+				    <label class="sr-only" for="pairInput">Pair</label>
+				    <input type="text" class="form-control" id="pairInput" ng-model="newpair" placeholder="USDEUR">
+				  </div>
+				  <button type="submit" class="btn btn-default" ng-click="addChart(newpair)">Add</button>
+				</form>
+		  </div>
+		</div>
+    <hr>
+    <tabset>
+	    <tab ng-repeat="tabchart in tabcharts" heading="{{tabchart.title}}" active="tabchart.active" disabled="tabchart.disabled" select="selectTab(tabchart)">
+	    	<pre>{{tabchart}}</pre>
+	    </tab>
+	  </tabset>
+		<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+		</div>
+		<div class="debug">
+			message: {{state.message}}
+		</div>
+	</div>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
+	<script src="app/lib/ui-bootstrap-0.6.0.min.js"></script>
+	<script src="app/lib/ui-bootstrap-tpls-0.6.0.min.js"></script>
+	<script src="http://code.highcharts.com/highcharts.js"></script>
+	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+	<script src="app/socket.js"></script>
+	<script src="app/core.js"></script>
+</body>
+</html>

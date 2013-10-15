@@ -1,0 +1,14 @@
+{"query":
+	{
+		"count":3,
+		"created":"2013-10-15T05:39:51Z",
+		"lang":"en-US",
+		"results":{
+			"rate":[
+				{"id":"USDEUR","Name":"USD to EUR","Rate":"0.737","Date":"10/15/2013","Time":"1:38am","Ask":"0.7371","Bid":"0.737"},
+				{"id":"EURAUD","Name":"EUR to AUD","Rate":"1.4236","Date":"10/15/2013","Time":"1:39am","Ask":"1.4241","Bid":"1.4232"},
+				{"id":"USDAUD","Name":"USD to AUD","Rate":"1.0493","Date":"10/15/2013","Time":"1:39am","Ask":"1.0495","Bid":"1.049"}
+			]
+		}
+	}
+}
