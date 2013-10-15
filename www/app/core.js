@@ -41,19 +41,24 @@
 
   .controller('AppController', function($scope, $http, yql, socket){
 
+    var currentPanel = 'dash-001-pane-001';
+
     $scope.state = {
       message: 'hello',
-      pairs: '"USDEUR"'
+      'dash-001-pane-001': {
+        tab: {
+          active: 'USDEUR',
+          list: [
+            /*{id: 'USDEUR', title: "USD/EUR", disabled: false, chart: undefined},*/
+            {id: 'EURAUD', title: "EUR/AUD", disabled: false, chart: undefined}
+          ]
+        }
+      }
     };
 
-    $scope.tabcharts = [
-      {title: "USDEUR", active: true, disabled: false, chart: undefined}/*,
-      {title: "EURAUD", active: true, disabled: false, chart: undefined}*/
-    ];
+    //socket.emit('subscribe', {channel: 'USDEUR'});
 
-    socket.emit('subscribe', {channel: 'USDEUR'});
-
-    var chart = $('#container').highcharts({
+    /*var chart = $('.container').highcharts({
             chart: {
                 zoomType: 'x',
                 spacingRight: 20
@@ -116,9 +121,9 @@
             }]
         });
 
-    var chart = $('#container').highcharts(),
+    var chart = $('.container').highcharts(),
         serie = chart.series[0],
-        setIntervalId;
+        setIntervalId;*/
 
     socket.forward('message', $scope);
     socket.forward('rate', $scope);
@@ -128,7 +133,8 @@
     });
 
     $scope.$on('socket:rate', function (ev, data){
-      serie.addPoint(Number(data.rate), true);
+      $scope.state[currentPanel].tab.list[1].chart.series[0].addPoint(Number(data.rate), true);
+      //serie.addPoint(Number(data.rate), true);
     });
 
     $scope.selectTab = function(tab){
@@ -136,13 +142,85 @@
     };
 
     $scope.addChart = function (pair){
-      $scope.tabcharts.push({
-        title: pair,
-        active: true,
+
+      var from  = pair.substring(0,3),
+          to    = pair.substring(3,6),
+          chart = undefined;
+
+      $scope.state[currentPanel].tab.list.push({
+        id: pair,
+        title: from+'/'+to,
         disabled: false,
-        chart: undefined
+        chart: chart
       });
-      //socket.emit('subscribe', {channel: pair});
+      $scope.state[currentPanel].tab.active = pair;
+
+      setTimeout(function() {
+        var chart = $('#'+currentPanel+'_'+pair).highcharts({
+            chart: {
+                zoomType: 'x',
+                spacingRight: 20
+            },
+            title: {
+                text: 'USD to EUR exchange rate'
+            },
+            subtitle: {
+                text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' :
+                    'Pinch the chart to zoom in'
+            },
+            xAxis: {
+                type: 'datetime',
+                maxZoom: 1000, //14 * 24 * 3600000, // fourteen days
+                title: {
+                    text: null
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Exchange rate'
+                }
+            },
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ]
+                    },
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false
+                    },
+                    shadow: false,
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+            },
+
+            series: [{
+                type: 'area',
+                name: 'USD to EUR',
+                pointInterval: 1000, //24 * 3600 * 
+                pointStart: new Date().getTime(),//Date.UTC(2013, 0, 01),
+                data: []
+            }]
+        });
+        //$scope.state[currentPanel].tab.list[$scope.state[currentPanel].tab.list.length-1].chart = chart;
+        socket.emit('subscribe', {channel: pair});
+      }, 300);
     };
 
     $scope.removeChart = function (pair){

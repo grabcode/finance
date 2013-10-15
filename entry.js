@@ -81,7 +81,7 @@ requirejs(['fs', 'http', 'express', 'winston', 'jade-amd', 'socket.io', 'server/
 	var dp = new Datapuller(logger);
 	dp.start(function(data){
 		//socket.emit('rate', { text : 'Welcome!' });
-		if(data.success){
+		if(data.success && data.success.payload.query){
 
 			if(data.success.payload.query.results && data.success.payload.query.results.rate){
 

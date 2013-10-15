@@ -18,3 +18,8 @@
 .full-opacity {
 	opacity: 0;
 }
+.container {
+  min-width: 310px;
+  height: 400px;
+  margin: 0 auto;
+}
