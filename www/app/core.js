@@ -47,9 +47,11 @@
     };
 
     $scope.tabcharts = [
-      {title: "USDEUR", active: true, disabled: false, chart: undefined},
-      {title: "EURAUD", active: true, disabled: false, chart: undefined}
+      {title: "USDEUR", active: true, disabled: false, chart: undefined}/*,
+      {title: "EURAUD", active: true, disabled: false, chart: undefined}*/
     ];
+
+    socket.emit('subscribe', {channel: 'USDEUR'});
 
     var chart = $('#container').highcharts({
             chart: {
@@ -104,7 +106,7 @@
                     threshold: null
                 }
             },
-    
+
             series: [{
                 type: 'area',
                 name: 'USD to EUR',
@@ -113,7 +115,7 @@
                 data: []
             }]
         });
-        
+
     var chart = $('#container').highcharts(),
         serie = chart.series[0],
         setIntervalId;
@@ -152,20 +154,11 @@
 
   angular.bootstrap(document, ['App']);
 
-  /*$(document).ready(function(){
-    var socket = io.connect('http://localhost:8080');
-    socket.on('message', function (data) {
-      console.log(data);
-      socket.emit('my other event', { my: 'data' });
-    });
-  });*/
-
   // Simple log function to keep the example simple
   function log () {
     if (typeof console !== 'undefined') {
       console.log.apply(console, arguments);
     }
   }
-  
 
 })(window.document, window.angular, window.io);
