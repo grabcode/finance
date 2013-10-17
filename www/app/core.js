@@ -6,6 +6,101 @@
     //socketProvider.prefix('socket:');
   })
 
+  .directive('myGraph', function() {
+    // return the directive link function. (compile function not needed)
+    return  {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+
+        attrs.setup = attrs.setup || {};
+
+        attrs.setup.from = scope.thistab.id.substring(0,3);
+        attrs.setup.to   = scope.thistab.id.substring(3,6);
+
+        var setup = {
+          'from': 'FROM',
+          'to'  : 'TO'
+        };
+
+        setup = angular.extend(setup, attrs.setup);
+
+        var $el = $(element);
+
+        $el.highcharts({
+          chart: {
+              zoomType: 'x',
+              spacingRight: 20
+          },
+          title: {
+              text: setup.from+' to '+setup.to+' exchange rate'
+          },
+          subtitle: {
+              text: document.ontouchstart === undefined ?
+                  'Click and drag in the plot area to zoom in' :
+                  'Pinch the chart to zoom in'
+          },
+          xAxis: {
+              type: 'datetime',
+              maxZoom: 1000, //14 * 24 * 3600000, // fourteen days
+              title: {
+                  text: null
+              }
+          },
+          yAxis: {
+              title: {
+                  text: 'Exchange rate'
+              }
+          },
+          tooltip: {
+              shared: true
+          },
+          legend: {
+              enabled: false
+          },
+          plotOptions: {
+              area: {
+                  fillColor: {
+                      linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                      stops: [
+                          [0, Highcharts.getOptions().colors[0]],
+                          [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                      ]
+                  },
+                  lineWidth: 1,
+                  marker: {
+                      enabled: false
+                  },
+                  shadow: false,
+                  states: {
+                      hover: {
+                          lineWidth: 1
+                      }
+                  },
+                  threshold: null
+              }
+          },
+
+          series: [{
+              type: 'area',
+              name: setup.from+' to '+setup.to,
+              pointInterval: 1000, //24 * 3600 * 1000
+              pointStart: new Date().getTime(),//Date.UTC(2013, 0, 01),
+              data: []
+          }]
+        });
+
+        var chart = $el.highcharts(),
+            serie = chart.series[0];
+
+        scope.thistab.serie = serie;
+
+        element.on('$destroy', function() {
+          console.log('todo destroy chat', this);
+        });
+      }
+    };
+  })
+
   .factory('yql', function($q, $http) {
 
     return {
@@ -48,82 +143,16 @@
       'dash-001-pane-001': {
         tab: {
           active: 'USDEUR',
-          list: [
-            /*{id: 'USDEUR', title: "USD/EUR", disabled: false, chart: undefined},*/
-            {id: 'EURAUD', title: "EUR/AUD", disabled: false, chart: undefined}
-          ]
+          list: {
+            USDEUR: {id: 'USDEUR', title: "USD/EUR", disabled: false},
+            EURAUD: {id: 'EURAUD', title: "EUR/AUD", disabled: false}
+          }
         }
       }
     };
 
-    //socket.emit('subscribe', {channel: 'USDEUR'});
-
-    /*var chart = $('.container').highcharts({
-            chart: {
-                zoomType: 'x',
-                spacingRight: 20
-            },
-            title: {
-                text: 'USD to EUR exchange rate'
-            },
-            subtitle: {
-                text: document.ontouchstart === undefined ?
-                    'Click and drag in the plot area to zoom in' :
-                    'Pinch the chart to zoom in'
-            },
-            xAxis: {
-                type: 'datetime',
-                maxZoom: 1000, //14 * 24 * 3600000, // fourteen days
-                title: {
-                    text: null
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Exchange rate'
-                }
-            },
-            tooltip: {
-                shared: true
-            },
-            legend: {
-                enabled: false
-            },
-            plotOptions: {
-                area: {
-                    fillColor: {
-                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
-                        stops: [
-                            [0, Highcharts.getOptions().colors[0]],
-                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                        ]
-                    },
-                    lineWidth: 1,
-                    marker: {
-                        enabled: false
-                    },
-                    shadow: false,
-                    states: {
-                        hover: {
-                            lineWidth: 1
-                        }
-                    },
-                    threshold: null
-                }
-            },
-
-            series: [{
-                type: 'area',
-                name: 'USD to EUR',
-                pointInterval: 1000, //24 * 3600 * 
-                pointStart: new Date().getTime(),//Date.UTC(2013, 0, 01),
-                data: []
-            }]
-        });
-
-    var chart = $('.container').highcharts(),
-        serie = chart.series[0],
-        setIntervalId;*/
+    socket.emit('subscribe', {channel: 'USDEUR'});
+    socket.emit('subscribe', {channel: 'EURAUD'});
 
     socket.forward('message', $scope);
     socket.forward('rate', $scope);
@@ -133,8 +162,7 @@
     });
 
     $scope.$on('socket:rate', function (ev, data){
-      $scope.state[currentPanel].tab.list[1].chart.series[0].addPoint(Number(data.rate), true);
-      //serie.addPoint(Number(data.rate), true);
+      $scope.state[currentPanel].tab.list[data.pair].serie.addPoint(Number(data.rate), true);
     });
 
     $scope.selectTab = function(tab){
@@ -143,84 +171,27 @@
 
     $scope.addChart = function (pair){
 
+      if(pair.length===7 && pair.indexOf('/')===3){
+        pair = pair.split('/').join('');
+      }
+
+      if(pair.length!==6){
+        return false;
+      }
+
       var from  = pair.substring(0,3),
           to    = pair.substring(3,6),
           chart = undefined;
 
-      $scope.state[currentPanel].tab.list.push({
+      $scope.state[currentPanel].tab.list[pair] = {
         id: pair,
         title: from+'/'+to,
         disabled: false,
         chart: chart
-      });
+      };
       $scope.state[currentPanel].tab.active = pair;
 
-      setTimeout(function() {
-        var chart = $('#'+currentPanel+'_'+pair).highcharts({
-            chart: {
-                zoomType: 'x',
-                spacingRight: 20
-            },
-            title: {
-                text: 'USD to EUR exchange rate'
-            },
-            subtitle: {
-                text: document.ontouchstart === undefined ?
-                    'Click and drag in the plot area to zoom in' :
-                    'Pinch the chart to zoom in'
-            },
-            xAxis: {
-                type: 'datetime',
-                maxZoom: 1000, //14 * 24 * 3600000, // fourteen days
-                title: {
-                    text: null
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Exchange rate'
-                }
-            },
-            tooltip: {
-                shared: true
-            },
-            legend: {
-                enabled: false
-            },
-            plotOptions: {
-                area: {
-                    fillColor: {
-                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
-                        stops: [
-                            [0, Highcharts.getOptions().colors[0]],
-                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                        ]
-                    },
-                    lineWidth: 1,
-                    marker: {
-                        enabled: false
-                    },
-                    shadow: false,
-                    states: {
-                        hover: {
-                            lineWidth: 1
-                        }
-                    },
-                    threshold: null
-                }
-            },
-
-            series: [{
-                type: 'area',
-                name: 'USD to EUR',
-                pointInterval: 1000, //24 * 3600 * 
-                pointStart: new Date().getTime(),//Date.UTC(2013, 0, 01),
-                data: []
-            }]
-        });
-        //$scope.state[currentPanel].tab.list[$scope.state[currentPanel].tab.list.length-1].chart = chart;
-        socket.emit('subscribe', {channel: pair});
-      }, 300);
+      socket.emit('subscribe', {channel: pair});
     };
 
     $scope.removeChart = function (pair){

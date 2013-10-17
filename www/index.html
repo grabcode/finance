@@ -29,7 +29,7 @@
 			</ul>
 			<div class="tab-content">
 				<div ng-repeat="thistab in state['dash-001-pane-001'].tab.list" ng-show="state['dash-001-pane-001'].tab.active == thistab.id">
-					<div id="dash-001-pane-001_{{thistab.id}}" class="container"></div>
+					<div id="dash-001-pane-001_{{thistab.id}}" class="container" my-graph="forex" data-pair="{{thistab.id}}" ></div>
 				</div>
 			</div>
     </div>

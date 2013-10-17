@@ -50,23 +50,6 @@ requirejs(['fs', 'http', 'express', 'winston', 'jade-amd', 'socket.io', 'server/
 		});
 	});
 
-	io.sockets.on('connection', function (socket) {
-
-		//on connect send a welcome message
-		socket.emit('message', { text : 'Welcome!' });
-
-		//on subscription request joins specified room
-		//later messages are broadcasted on the rooms
-		socket.on('subscribe', function (data) {
-			socket.join(data.channel);
-		});
-
-		socket.on('unsubscribe', function (data) {
-			socket.leave(data.channel);
-		});
-
-	});
-
 	/**
 	 * Server
 	 */
@@ -97,6 +80,26 @@ requirejs(['fs', 'http', 'express', 'winston', 'jade-amd', 'socket.io', 'server/
 			}
 
 		}
+	});
+
+	io.sockets.on('connection', function (socket) {
+
+		//on connect send a welcome message
+		socket.emit('message', { text : 'Welcome!' });
+
+		//on subscription request joins specified room
+		//later messages are broadcasted on the rooms
+		socket.on('subscribe', function (data) {
+			socket.join(data.channel);
+			if(data.channel.length===6) {
+				dp.addPair(data.channel);
+			}
+		});
+
+		socket.on('unsubscribe', function (data) {
+			socket.leave(data.channel);
+		});
+
 	});
 
 	/*
